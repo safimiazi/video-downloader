@@ -287,6 +287,7 @@ async function handleProgressiveDownload(url: string, quality: string, audioOnly
     }
   });
 
+  
   return new Response(stream, {
     headers: {
       'Content-Type': 'text/event-stream',
