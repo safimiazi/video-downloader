@@ -1,36 +1,218 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Video Downloader
 
-## Getting Started
+A production-ready web application for downloading videos from multiple platforms including YouTube, TikTok, Facebook, Instagram, and Twitter.
 
-First, run the development server:
+## Features
 
+- ✅ **Multi-Platform Support**: YouTube, TikTok, Facebook, Instagram, and Twitter
+- ✅ **Full Download Support**: YouTube (full), Facebook (direct), TikTok (direct), Instagram (limited), Twitter (limited)
+- ✅ **Multiple Quality Options**: Choose from available video qualities
+- ✅ **Modern UI**: Beautiful, responsive design with dark mode support
+- ✅ **Fast & Efficient**: Built with Next.js 14+ and optimized for performance
+- ✅ **Production Ready**: Error handling, validation, and security measures included
+- ✅ **Universal Streaming**: Handles different video formats and platforms
+
+## Tech Stack
+
+- **Frontend**: Next.js 14+, React 19, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes
+- **Video Processing**: ytdl-core, axios, cheerio
+- **Deployment**: Vercel, Netlify, or any Node.js hosting
+
+## Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <your-repo-url>
+cd video-downloader
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Create environment file:
+```bash
+cp .env.example .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Add this to `.env.local`:
+```env
+YTDL_NO_UPDATE=1
+NODE_ENV=development
+```
 
-## Learn More
+4. Run development server:
+```bash
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+5. Open [http://localhost:3000](http://localhost:3000)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Testing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Test the YouTube API functionality:
+```bash
+# Visit http://localhost:3000/api/test-youtube
+# This will test if YouTube downloads are working
+```
 
-## Deploy on Vercel
+Test other platforms:
+```bash
+# Test Facebook
+# Visit http://localhost:3000/api/test-platforms?platform=facebook&url=YOUR_FACEBOOK_URL
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Test TikTok  
+# Visit http://localhost:3000/api/test-platforms?platform=tiktok&url=YOUR_TIKTOK_URL
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Production Deployment
+
+### Vercel (Recommended)
+
+1. Push your code to GitHub
+2. Import project in Vercel
+3. Deploy automatically
+
+### Manual Deployment
+
+```bash
+npm run build
+npm start
+```
+
+## Usage
+
+1. Paste a video URL from supported platforms
+2. Click "Get Video" to fetch video information
+3. Choose your preferred quality
+4. Click download button to save the video
+
+## Supported Platforms
+
+- **YouTube**: Full support with multiple quality options ✅
+- **Facebook**: Direct video download support ✅
+- **TikTok**: Direct video download support ✅
+- **Instagram**: Limited support (some videos may require login) ⚠️
+- **Twitter**: Limited support (API restrictions) ⚠️
+
+## API Endpoints
+
+### POST /api/download
+Fetch video information and metadata
+
+**Request:**
+```json
+{
+  "url": "https://youtube.com/watch?v=..."
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "title": "Video Title",
+    "thumbnail": "https://...",
+    "duration": "180",
+    "author": "Channel Name",
+    "formats": [...]
+  }
+}
+```
+
+### GET /api/stream
+Stream and download video
+
+**Query Parameters:**
+- `url`: Video URL (required)
+- `quality`: Quality preference (default: "highest")
+
+## Important Notes
+
+### Legal Compliance
+
+- This tool is for personal use only
+- Respect copyright laws and platform terms of service
+- Do not use for commercial purposes without proper authorization
+- Users are responsible for their usage
+
+### Platform Limitations
+
+- **YouTube**: Fully functional with ytdl-core
+- **Other Platforms**: Require additional API integrations or third-party services
+- Some platforms have rate limiting and anti-scraping measures
+
+### Enhancing Other Platforms
+
+To add full download support for TikTok, Facebook, etc., you can:
+
+1. Use RapidAPI services (e.g., TikTok Downloader API)
+2. Implement platform-specific APIs
+3. Use third-party download services
+
+Example integration in `app/api/download/route.ts`:
+
+```typescript
+// Add RapidAPI integration
+const options = {
+  method: 'GET',
+  url: 'https://tiktok-downloader.p.rapidapi.com/',
+  params: { url: videoUrl },
+  headers: {
+    'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
+    'X-RapidAPI-Host': 'tiktok-downloader.p.rapidapi.com'
+  }
+};
+```
+
+## Performance Optimization
+
+- Video streaming instead of full download
+- Efficient caching strategies
+- CDN integration for static assets
+- Rate limiting to prevent abuse
+
+## Security Features
+
+- URL validation
+- CORS configuration
+- Error handling
+- Input sanitization
+
+## Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a pull request
+
+## License
+
+MIT License - feel free to use this project for personal or commercial purposes.
+
+## Support
+
+For issues and questions:
+- Open an issue on GitHub
+- Check existing documentation
+- Review API endpoint specifications
+
+## Roadmap
+
+- [ ] Add batch download support
+- [ ] Implement download history
+- [ ] Add playlist support for YouTube
+- [ ] Integrate more platforms
+- [ ] Add video format conversion
+- [ ] Implement user accounts
+- [ ] Add download queue management
+
+---
+
+Built with ❤️ using Next.js and TypeScript
