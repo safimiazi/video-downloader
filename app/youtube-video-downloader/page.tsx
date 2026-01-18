@@ -567,7 +567,7 @@ export default function YouTubeDownloader() {
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-xs flex items-center justify-center font-medium flex-shrink-0">2</span>
-                  <span><strong>Click "Get Video Information"</strong> - Our tool will fetch video details automatically</span>
+                  <span><strong>Click &quot;Get Video Information&quot;</strong> - Our tool will fetch video details automatically</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-xs flex items-center justify-center font-medium flex-shrink-0">3</span>
@@ -649,8 +649,8 @@ export default function YouTubeDownloader() {
                   Is this YouTube video downloader safe?
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300">
-                  <strong>Absolutely safe!</strong> Our online YouTube downloader doesn't require any software installation, 
-                  doesn't contain malware, and doesn't ask for personal information. All downloads happen securely in your browser.
+                  <strong>Absolutely safe!</strong> Our online YouTube downloader doesn&apos;t require any software installation, 
+                  doesn&apos;t contain malware, and doesn&apos;t ask for personal information. All downloads happen securely in your browser.
                 </p>
               </div>
             </div>
@@ -664,7 +664,7 @@ export default function YouTubeDownloader() {
               No registration • No download limits • Works on all devices
             </p>
             <p className="mt-2 text-xs">
-              This tool is for personal use only. Please respect YouTube's terms of service and copyright laws.
+              This tool is for personal use only. Please respect YouTube&apos;s terms of service and copyright laws.
             </p>
           </footer>
         </div>
