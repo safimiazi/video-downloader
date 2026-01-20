@@ -15,7 +15,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Video Downloader - Download from YouTube, TikTok, Facebook & More",
   description: "Free online video downloader. Download videos from YouTube, TikTok, Facebook, Instagram, Twitter and more platforms easily.",
+  verification: {
+    google: "qCvF2fC9zynChYWKEf3mJpCoh0ITzpeZI4r0JcUOghE",
+  },
 };
+
 
 export default function RootLayout({
   children,
