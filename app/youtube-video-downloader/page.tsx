@@ -7,6 +7,12 @@ import Head from 'next/head';
 export default function YouTubeDownloader() {
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // Debug: Log the backend URL on component mount
+  useEffect(() => {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3002';
+    console.log('🔧 Backend URL configured:', backendUrl);
+  }, []);
   const [videoInfo, setVideoInfo] = useState<{
     title: string;
     author: string;
@@ -31,9 +37,9 @@ export default function YouTubeDownloader() {
   ];
 
   // SEO-friendly page title and description
-  const pageTitle = "Free YouTube Video Downloader Online - Download 4K, HD Videos & MP3";
-  const pageDescription = "Download YouTube videos in 4K, 1080p, 720p or extract MP3 audio for free. Safe, fast, and online YouTube video downloader. No registration required.";
-  const keywords = "youtube video downloader, youtube video downloader 4k, free youtube video downloader, youtube video downloader online, youtube video downloader safe, download youtube video, youtube mp3 downloader";
+  const pageTitle = "Free YouTube Video & Shorts Downloader Online - Download 4K, HD Videos & MP3";
+  const pageDescription = "Download YouTube videos and Shorts in 4K, 1080p, 720p or extract MP3 audio for free. Safe, fast, and online YouTube video downloader. No registration required.";
+  const keywords = "youtube video downloader, youtube shorts downloader, youtube video downloader 4k, free youtube video downloader, youtube video downloader online, youtube video downloader safe, download youtube video, download youtube shorts, youtube mp3 downloader";
 
   // Cleanup EventSource on component unmount
   useEffect(() => {
@@ -89,9 +95,19 @@ export default function YouTubeDownloader() {
     setTotalSize(0);
     setError('');
 
+    // Debug logging for audio downloads
+    console.log('🎵 Download initiated:', { quality, audioOnly, url });
+
     try {
+      // Get backend URL from environment or use default
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3002';
+      
+      // Debug logging
+      console.log('Backend URL:', backendUrl);
+      console.log('Full progress URL:', `${backendUrl}/api/youtube-download?url=${encodeURIComponent(url)}&quality=${quality}&audioOnly=${audioOnly}&progress=true`);
+      
       // Start SSE connection for real-time progress
-      const progressUrl = `/api/youtube-download?url=${encodeURIComponent(url)}&quality=${quality}&audioOnly=${audioOnly}&progress=true`;
+      const progressUrl = `${backendUrl}/api/youtube-download?url=${encodeURIComponent(url)}&quality=${quality}&audioOnly=${audioOnly}&progress=true`;
       const eventSource = new EventSource(progressUrl);
 
       eventSource.onmessage = (event) => {
@@ -120,13 +136,16 @@ export default function YouTubeDownloader() {
             case 'complete':
               setDownloadProgress(100);
               setDownloadStatus('Download completed!');
+              console.log('🎉 Download completed:', data);
               if (eventSource.readyState !== EventSource.CLOSED) {
                 eventSource.close();
               }
               
               // Trigger actual file download
               setTimeout(() => {
-                const downloadUrl = `/api/youtube-download?url=${encodeURIComponent(url)}&quality=${quality}&audioOnly=${audioOnly}`;
+                const downloadUrl = `${backendUrl}/api/youtube-download?url=${encodeURIComponent(url)}&quality=${quality}&audioOnly=${audioOnly}`;
+                console.log('Download URL:', downloadUrl);
+                console.log('🎵 Audio download:', audioOnly, 'Quality:', quality);
                 const link = document.createElement('a');
                 link.href = downloadUrl;
                 link.download = audioOnly ? 'audio.mp3' : `video_${quality}p.mp4`;
@@ -160,6 +179,8 @@ export default function YouTubeDownloader() {
 
       eventSource.onerror = (error) => {
         console.error('SSE connection error:', error);
+        console.error('EventSource readyState:', eventSource.readyState);
+        console.error('EventSource URL:', eventSource.url);
         setError('Connection error. Please try again.');
         setIsDownloading(false);
         setDownloadProgress(0);
@@ -188,14 +209,23 @@ export default function YouTubeDownloader() {
 
   const extractVideoId = (url: string): string | null => {
     const patterns = [
+      // Regular YouTube video URLs
       /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
       /youtube\.com\/v\/([^&\n?#]+)/,
+      // YouTube Shorts URLs
+      /youtube\.com\/shorts\/([^&\n?#]+)/,
+      /youtu\.be\/shorts\/([^&\n?#]+)/,
+      // Mobile YouTube URLs
+      /m\.youtube\.com\/watch\?v=([^&\n?#]+)/,
+      // YouTube Music URLs
+      /music\.youtube\.com\/watch\?v=([^&\n?#]+)/,
     ];
     
     for (const pattern of patterns) {
       const match = url.match(pattern);
       if (match && match[1]) {
-        return match[1];
+        // Remove any additional parameters that might be in the video ID
+        return match[1].split('&')[0].split('?')[0];
       }
     }
     return null;
@@ -276,15 +306,15 @@ export default function YouTubeDownloader() {
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4">
               <span className="bg-gradient-to-r from-red-600 via-red-500 to-pink-600 bg-clip-text text-transparent">
-                YouTube Video Downloader
+                YouTube Video & Shorts Downloader
               </span>
               <span className="block text-2xl md:text-3xl lg:text-4xl font-normal mt-2 text-gray-700 dark:text-gray-300">
-                Download Videos in 4K, HD & MP3 Format
+                Download Videos & Shorts in 4K, HD & MP3 Format
               </span>
             </h1>
             <p className="text-gray-600 dark:text-gray-300 text-lg max-w-3xl mx-auto">
               <strong>Free YouTube video downloader online</strong> that supports <strong>4K, 1080p, 720p video downloads</strong> and <strong>MP3 audio extraction</strong>. 
-              Safe, fast, and <strong>no registration required</strong> - download YouTube videos directly in your browser.
+              Download <strong>YouTube videos and Shorts</strong> safely and fast with <strong>no registration required</strong> - works directly in your browser.
             </p>
           </header>
 
@@ -314,7 +344,7 @@ export default function YouTubeDownloader() {
                       YouTube Video Downloader Online
                     </h2>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Supports all YouTube URLs including watch, youtu.be, and embed links
+                      Supports all YouTube URLs including watch, youtu.be, shorts, and embed links
                     </p>
                   </div>
                 </div>
@@ -329,7 +359,7 @@ export default function YouTubeDownloader() {
                       id="youtube-url"
                       value={url}
                       onChange={(e) => setUrl(e.target.value)}
-                      placeholder="Paste YouTube URL here: https://www.youtube.com/watch?v=..."
+                      placeholder="Paste YouTube URL here: https://www.youtube.com/watch?v=... or https://youtube.com/shorts/..."
                       className="w-full px-5 py-4 pl-14 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-500/20 dark:bg-gray-700 dark:text-white transition-all duration-300 text-lg"
                       required
                       aria-label="YouTube video URL input"
@@ -563,11 +593,11 @@ export default function YouTubeDownloader() {
               <ol className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
                 <li className="flex items-start gap-3">
                   <span className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-xs flex items-center justify-center font-medium flex-shrink-0">1</span>
-                  <span><strong>Paste YouTube URL</strong> - Copy and paste any YouTube video link in the input field above</span>
+                  <span><strong>Paste YouTube URL</strong> - Copy and paste any YouTube video or Shorts link in the input field above</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-xs flex items-center justify-center font-medium flex-shrink-0">2</span>
-                  <span><strong>Click &quot;Get Video Information&quot;</strong> - Our tool will fetch video details automatically</span>
+                  <span><strong>Click &quot;Get Video Information&quot;</strong> - Our tool will fetch video or Shorts details automatically</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-xs flex items-center justify-center font-medium flex-shrink-0">3</span>
@@ -601,11 +631,11 @@ export default function YouTubeDownloader() {
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-amber-500 dark:text-amber-400 mt-0.5 flex-shrink-0">•</span>
-                  <span><strong>HD Quality</strong> - Download YouTube videos in 4K, 2K, 1080p, 720p with audio included</span>
+                  <span><strong>HD Quality</strong> - Download YouTube videos and Shorts in 4K, 2K, 1080p, 720p with audio included</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-amber-500 dark:text-amber-400 mt-0.5 flex-shrink-0">•</span>
-                  <span><strong>Free Forever</strong> - No registration, no payment, unlimited YouTube video downloads</span>
+                  <span><strong>Free Forever</strong> - No registration, no payment, unlimited YouTube video and Shorts downloads</span>
                 </li>
               </ul>
             </article>
@@ -628,25 +658,34 @@ export default function YouTubeDownloader() {
               </div>
               <div className="border-b border-gray-200 dark:border-gray-700 pb-6">
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">
-                  What video qualities does this YouTube downloader support?
+                  Does this work with YouTube Shorts?
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300">
-                  Our tool supports <strong>all YouTube video qualities</strong> from 360p to 4K (2160p). 
-                  You can download YouTube videos in 4K, 2K, 1080p Full HD, 720p HD, 480p SD, and 360p.
+                  <strong>Yes, absolutely!</strong> Our YouTube downloader fully supports <strong>YouTube Shorts</strong> in addition to regular videos. 
+                  Just paste any YouTube Shorts URL (youtube.com/shorts/...) and download in your preferred quality or as MP3 audio.
                 </p>
               </div>
               <div className="border-b border-gray-200 dark:border-gray-700 pb-6">
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">
-                  Can I download MP3 audio from YouTube videos?
+                  What video qualities does this YouTube downloader support?
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300">
-                  <strong>Yes!</strong> Our YouTube MP3 downloader feature allows you to extract audio from any YouTube video 
-                  and save it as high-quality MP3 (320 kbps). Perfect for downloading music, podcasts, or audio content.
+                  Our tool supports <strong>all YouTube video qualities</strong> from 360p to 4K (2160p). 
+                  You can download YouTube videos and Shorts in 4K, 2K, 1080p Full HD, 720p HD, 480p SD, and 360p.
+                </p>
+              </div>
+              <div className="border-b border-gray-200 dark:border-gray-700 pb-6">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">
+                  Can I download MP3 audio from YouTube videos and Shorts?
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300">
+                  <strong>Yes!</strong> Our YouTube MP3 downloader feature allows you to extract audio from any YouTube video or Short 
+                  and save it as high-quality MP3 (320 kbps). Perfect for downloading music, podcasts, or audio content from both regular videos and Shorts.
                 </p>
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">
-                  Is this YouTube video downloader safe?
+                  Is this YouTube video and Shorts downloader safe?
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300">
                   <strong>Absolutely safe!</strong> Our online YouTube downloader doesn&apos;t require any software installation, 
@@ -659,8 +698,8 @@ export default function YouTubeDownloader() {
           {/* Footer Note with Keywords */}
           <footer className="text-center text-gray-500 dark:text-gray-400 text-sm">
             <p>
-              <strong>Free YouTube Video Downloader Online</strong> • Download YouTube videos in <strong>4K, HD quality</strong> • 
-              Extract <strong>MP3 audio from YouTube</strong> • <strong>Safe YouTube downloader</strong> • 
+              <strong>Free YouTube Video & Shorts Downloader Online</strong> • Download YouTube videos and Shorts in <strong>4K, HD quality</strong> • 
+              Extract <strong>MP3 audio from YouTube videos and Shorts</strong> • <strong>Safe YouTube downloader</strong> • 
               No registration • No download limits • Works on all devices
             </p>
             <p className="mt-2 text-xs">
